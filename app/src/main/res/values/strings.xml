@@ -1,0 +1,27 @@
+<resources>
+    <string name="app_name">GoalPulse</string>
+    <string name="widget_description">Виджет круговой шкалы накоплений GoalPulse: текущая сумма сбора внутри кольца и остаток до цели.</string>
+    <string name="widget_gauge_desc">Круговая шкала прогресса накоплений</string>
+    <string name="widget_contribute_action">+ Пополнить сбор</string>
+    <string name="auth_title">GoalPulse</string>
+    <string name="auth_subtitle">Умный трекер и виджет ваших финансовых целей с круговой шкалой</string>
+    <string name="sign_in_with_google">Войти через Google</string>
+    <string name="sign_out">Выйти из аккаунта</string>
+    <string name="new_goal_button">Новая цель</string>
+    <string name="edit_goal_button">Изменить цель</string>
+    <string name="delete_goal_button">Удалить цель</string>
+    <string name="pin_to_widget">На виджет</string>
+    <string name="pinned_to_widget">Закреплено на виджете</string>
+    <string name="saved_label">СОБРАНО</string>
+    <string name="remaining_prefix">Осталось накопить:</string>
+    <string name="target_prefix">Цель:</string>
+    <string name="goal_completed_badge">Цель достигнута!</string>
+    <string name="quick_contribute_title">Быстрое пополнение</string>
+    <string name="custom_deposit_button">Своя сумма +</string>
+    <string name="custom_withdraw_button">Снять −</string>
+    <string name="pace_card_title">Темп до целевой даты</string>
+    <string name="history_section_title">История взносов</string>
+    <string name="empty_history_hint">Пока нет операций. Используйте кнопки быстрого пополнения выше, чтобы приблизить цель.</string>
+    <string name="empty_goals_title">Создайте первую финансовую цель</string>
+    <string name="empty_goals_subtitle">Укажите нужную сумму, выберите цвет круговой шкалы и отслеживайте прогресс прямо на главном экране или виджете.</string>
+</resources>

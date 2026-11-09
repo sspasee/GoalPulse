@@ -1,0 +1,130 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Pillar 1: Global Default-Deny Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() >= 1 && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    function isNumber(val) {
+      return val is int || val is float;
+    }
+
+    // Validation Blueprint: SavingsGoal
+    function isValidSavingsGoal(data) {
+      return data.userId is string &&
+             data.userId == request.auth.uid &&
+             data.userId.size() >= 1 && data.userId.size() <= 128 &&
+             data.title is string &&
+             data.title.size() >= 1 && data.title.size() <= 100 &&
+             isNumber(data.targetAmount) &&
+             data.targetAmount > 0 && data.targetAmount <= 1000000000000 &&
+             isNumber(data.currentAmount) &&
+             data.currentAmount >= 0 && data.currentAmount <= 1000000000000 &&
+             data.currencySymbol is string &&
+             data.currencySymbol.size() >= 1 && data.currencySymbol.size() <= 10 &&
+             data.colorHex is string &&
+             data.colorHex.size() >= 4 && data.colorHex.size() <= 12 &&
+             (!('targetDateMillis' in data) || data.targetDateMillis == null || (data.targetDateMillis is int && data.targetDateMillis >= 0)) &&
+             data.createdAt is timestamp &&
+             data.createdAt <= request.time &&
+             data.updatedAt is timestamp &&
+             data.updatedAt <= request.time;
+    }
+
+    // Validation Blueprint: GoalTransaction
+    function isValidGoalTransaction(data) {
+      return data.userId is string &&
+             data.userId == request.auth.uid &&
+             data.userId.size() >= 1 && data.userId.size() <= 128 &&
+             isValidId(data.goalId) &&
+             isNumber(data.amount) &&
+             data.amount != 0 &&
+             data.amount >= -1000000000000 && data.amount <= 1000000000000 &&
+             data.note is string &&
+             data.note.size() >= 0 && data.note.size() <= 200 &&
+             data.createdAt is timestamp &&
+             data.createdAt <= request.time;
+    }
+
+    match /users/{userId}/goals/{goalId} {
+      allow get: if isSignedIn() &&
+                    isValidId(userId) &&
+                    isValidId(goalId) &&
+                    request.auth.uid == userId &&
+                    existing().userId == request.auth.uid;
+
+      allow list: if isSignedIn() &&
+                     request.auth.uid == userId &&
+                     existing().userId == request.auth.uid;
+
+      allow create: if isSignedIn() &&
+                       isValidId(userId) &&
+                       isValidId(goalId) &&
+                       request.auth.uid == userId &&
+                       incoming().keys().hasAll(['userId', 'title', 'targetAmount', 'currentAmount', 'currencySymbol', 'colorHex', 'createdAt', 'updatedAt']) &&
+                       incoming().keys().hasOnly(['userId', 'title', 'targetAmount', 'currentAmount', 'currencySymbol', 'colorHex', 'targetDateMillis', 'createdAt', 'updatedAt']) &&
+                       isValidSavingsGoal(incoming());
+
+      allow update: if isSignedIn() &&
+                       isValidId(userId) &&
+                       isValidId(goalId) &&
+                       request.auth.uid == userId &&
+                       existing().userId == request.auth.uid &&
+                       isValidSavingsGoal(incoming()) &&
+                       incoming().userId == existing().userId &&
+                       incoming().createdAt == existing().createdAt &&
+                       incoming().diff(existing()).affectedKeys().hasOnly(['title', 'targetAmount', 'currentAmount', 'currencySymbol', 'colorHex', 'targetDateMillis', 'updatedAt']);
+
+      allow delete: if isSignedIn() &&
+                       isValidId(userId) &&
+                       isValidId(goalId) &&
+                       request.auth.uid == userId &&
+                       existing().userId == request.auth.uid;
+    }
+
+    match /users/{userId}/transactions/{transactionId} {
+      allow get: if isSignedIn() &&
+                    isValidId(userId) &&
+                    isValidId(transactionId) &&
+                    request.auth.uid == userId &&
+                    existing().userId == request.auth.uid;
+
+      allow list: if isSignedIn() &&
+                     request.auth.uid == userId &&
+                     existing().userId == request.auth.uid;
+
+      allow create: if isSignedIn() &&
+                       isValidId(userId) &&
+                       isValidId(transactionId) &&
+                       request.auth.uid == userId &&
+                       incoming().keys().hasAll(['userId', 'goalId', 'amount', 'note', 'createdAt']) &&
+                       incoming().keys().hasOnly(['userId', 'goalId', 'amount', 'note', 'createdAt']) &&
+                       isValidGoalTransaction(incoming());
+
+      allow update: if false;
+
+      allow delete: if isSignedIn() &&
+                       isValidId(userId) &&
+                       isValidId(transactionId) &&
+                       request.auth.uid == userId &&
+                       existing().userId == request.auth.uid;
+    }
+  }
+}

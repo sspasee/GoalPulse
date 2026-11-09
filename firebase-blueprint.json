@@ -1,0 +1,108 @@
+{
+  "entities": {
+    "SavingsGoal": {
+      "title": "SavingsGoal",
+      "description": "Represents a user's financial savings goal with target amount, current saved balance, optional target deadline, currency symbol, and accent color.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "The UID of the authenticated Google user who owns this savings goal."
+        },
+        "title": {
+          "type": "string",
+          "description": "Display name of the savings goal (1 to 100 characters)."
+        },
+        "targetAmount": {
+          "type": "number",
+          "description": "Total target amount to save (strictly greater than 0)."
+        },
+        "currentAmount": {
+          "type": "number",
+          "description": "Currently accumulated amount for this goal (0 or greater)."
+        },
+        "currencySymbol": {
+          "type": "string",
+          "description": "Currency symbol displayed inside the circular gauge (e.g. ₽, $, €)."
+        },
+        "colorHex": {
+          "type": "string",
+          "description": "Hex color string for the circular progress gauge accent."
+        },
+        "targetDateMillis": {
+          "type": "number",
+          "description": "Optional target completion date in epoch milliseconds."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when the goal was created (FieldValue.serverTimestamp())."
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when the goal was last updated (FieldValue.serverTimestamp())."
+        }
+      },
+      "required": [
+        "userId",
+        "title",
+        "targetAmount",
+        "currentAmount",
+        "currencySymbol",
+        "colorHex",
+        "createdAt",
+        "updatedAt"
+      ]
+    },
+    "GoalTransaction": {
+      "title": "GoalTransaction",
+      "description": "Represents a single deposit or withdrawal contribution towards a specific savings goal.",
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string",
+          "description": "The UID of the authenticated Google user who owns this transaction."
+        },
+        "goalId": {
+          "type": "string",
+          "description": "The document ID of the parent SavingsGoal."
+        },
+        "amount": {
+          "type": "number",
+          "description": "Signed transaction amount (positive for deposit, negative for withdrawal, non-zero)."
+        },
+        "note": {
+          "type": "string",
+          "description": "Short note or label describing the contribution (0 to 200 characters)."
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Server timestamp when the transaction was recorded (FieldValue.serverTimestamp())."
+        }
+      },
+      "required": [
+        "userId",
+        "goalId",
+        "amount",
+        "note",
+        "createdAt"
+      ]
+    }
+  },
+  "firestore": {
+    "/users/{userId}/goals/{goalId}": {
+      "schema": {
+        "$ref": "#/entities/SavingsGoal"
+      },
+      "description": "Stores user-owned savings goals isolated under the authenticated user's UID."
+    },
+    "/users/{userId}/transactions/{transactionId}": {
+      "schema": {
+        "$ref": "#/entities/GoalTransaction"
+      },
+      "description": "Stores user-owned savings transactions isolated under the authenticated user's UID."
+    }
+  }
+}
